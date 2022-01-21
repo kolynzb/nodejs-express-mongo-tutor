@@ -9,3 +9,9 @@ console.log(textIn);
 const textOut = `this is what we know about the overcado : ${textIn} .\nCreated at ${Date.now()}`;
 fs.writeFileSync("./text/output.txt", textOut);
 console.log("file has been created");
+
+//non blocking or async
+fs.readFile("./text/nonBlock.txt", "utf-8", (err, data) => {
+  console.log(data);
+});
+//fs.writeFile()
