@@ -1,7 +1,15 @@
 const Tour = require('../models/tourModel');
+const APIFeatures = require('../utils/apiFeatures');
 
 exports.checkBody = (req, res, next) => {
   console.log(`body has been checked`);
+  next();
+};
+//api aliasing
+exports.aliasTopTours = async (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratingAverage,price';
+  req.query.feilds = 'name,price,ratingsAverage,summary,difficulty';
   next();
 };
 
@@ -17,32 +25,13 @@ exports.createTour = async (req, res) => {
 
 exports.getAllTours = async (req, res) => {
   try {
-    // filtering
-    const queryObject = { ...req.query };
-    const excludedFields = ['page', 'sort', 'limit', 'fields'];
-    excludedFields.forEach(el => delete queryObject[el]);
-
-    //advanced filtering
-    let queryStr = JSON.stringify(queryObject);
-    queryStr = queryStr.replace(/\b(gte|lte|lt|gt)\b/g, match => `$${match}`);
-    let query = Tour.find(JSON.parse(queryStr));
-
-    //Sorting
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
-      query = query.sort(sortBy);
-    } else {
-      query = query.sort('-createdAt');
-    }
-    //field limiting
-    if (req.query.field) {
-      const fields = req.query.field.split(',').join(' ');
-      query = query.select(fields); //this called projecting
-    } else {
-      query = query.select('-__v'); //excluding __ v
-    }
     //query
-    const tours = await query;
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const tours = await features.query;
 
     res.status(200).json({
       status: 'success',
