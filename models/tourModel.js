@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+// const validator = require('validator');
 
 const tourSchema = new mongoose.Schema( //takes in two objects the schema defination and the schema options
   {
@@ -7,7 +8,10 @@ const tourSchema = new mongoose.Schema( //takes in two objects the schema defina
       type: String,
       required: [true, 'A tour must have a name'],
       unique: true,
-      trim: true
+      trim: true,
+      maxLength: [50, 'must be at most 50 characters'],
+      minLength: [10, 'must be atleast most 50 characters']
+      //,validate: [validator.isAlpha, 'Title must contain only characters']
     },
     slug: {
       type: String
@@ -22,11 +26,17 @@ const tourSchema = new mongoose.Schema( //takes in two objects the schema defina
     },
     difficulty: {
       type: String,
-      required: [true, 'A tour must have a difficulty']
+      required: [true, 'A tour must have a difficulty'],
+      enum: {
+        values: ['easy', 'medium', 'difficult'],
+        messages: 'difficulty is either easy  medium or difficult'
+      }
     },
     ratingsAverage: {
       type: Number,
-      default: 4.5
+      default: 4.5,
+      min: [1, 'Rating must be above 1'],
+      max: [5, 'Rating must be below 5']
     },
     ratingsQuantity: {
       type: Number,
@@ -36,7 +46,16 @@ const tourSchema = new mongoose.Schema( //takes in two objects the schema defina
       type: Number,
       required: [true, 'A tour must have a price']
     },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      validate: {
+        message: 'Discount price ({VALUE}) should be below the regular Price',
+        validator: function(val) {
+          // this validator only works on new document
+          return val < this.price;
+        }
+      }
+    },
     summary: {
       type: String,
       trim: true,
@@ -99,8 +118,9 @@ tourSchema.pre(/^find/, function(next) {
 // });
 
 //AGGREGAATION MIDDLEWARE
-// tourSchema.pre('aggregate', function(next) {
-//   next();
-// });
+tourSchema.pre('aggregate', function(next) {
+  this.pipeline().unshift({ secretTour: { $ne: true } });
+  next();
+});
 
 module.exports = mongoose.model('Tour', tourSchema);
