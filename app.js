@@ -12,4 +12,10 @@ app.use(express.static(`${__dirname}/public`));
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
+app.all('*', (req, res) => {
+  res
+    .status(404)
+    .json({ status: 'fail', message: `Cant find ${req.originalUrl}` });
+});
+
 module.exports = app;
