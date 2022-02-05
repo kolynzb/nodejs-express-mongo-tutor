@@ -7,7 +7,9 @@ const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
 
-process.env.NODE_ENV = 'development' && app.use(morgan('dev'));
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 
 app.use(express.json()); // helps us access to the request body
 app.use(express.static(`${__dirname}/public`));
@@ -26,6 +28,5 @@ app.all('*', (req, res, next) => {
 
   next(new AppError(`Cant find ${req.originalUrl}`, 404)); //when we pass in a parameter it will assume that this is an error ad trigger the error handling middleware
 });
-
 app.use(globalErrorHandler);
 module.exports = app;
