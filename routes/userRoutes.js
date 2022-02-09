@@ -8,6 +8,9 @@ const {
   deleteUser,
   getUserById
 } = require('../controllers/userController');
+const authController = require('../controllers/authController');
+
+router.post('/signup', authController.signup);
 
 router
   .route('/')
