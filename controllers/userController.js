@@ -1,9 +1,19 @@
-const getAllUsers = (req, res) => {};
+const User = require('../models/userModel');
+const catchAsync = require('../utils/catchAsync');
 
-const updateUser = (req, res) => {};
 const createUser = (req, res) => {};
-const deleteUser = (req, res) => {};
+const getAllUsers = catchAsync(async (req, res, next) => {
+  const users = await User.find();
+
+  res.status(200).json({
+    status: 'success',
+    results: users.length,
+    data: { users }
+  });
+});
 const getUserById = (req, res) => {};
+const updateUser = (req, res) => {};
+const deleteUser = (req, res) => {};
 
 module.exports = {
   getAllUsers,
@@ -11,5 +21,5 @@ module.exports = {
   updateUser,
   createUser,
   deleteUser,
-  getUserById,
+  getUserById
 };
