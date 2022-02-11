@@ -14,7 +14,7 @@ router.post('/signup', authController.signup);
 router.post('/login', authController.login);
 
 router.post('/forgotpassword', authController.forgotPassword);
-router.post('/resetpassword', authController.resetPassword);
+router.post('/resetpassword/:token', authController.resetPassword);
 
 router
   .route('/')
