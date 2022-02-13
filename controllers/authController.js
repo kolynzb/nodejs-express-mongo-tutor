@@ -12,6 +12,13 @@ const signToken = id => {
     expiresIn: process.env.JWT_EXPIRES_IN
   });
 };
+
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+
+  res.status(statusCode).json({ status: 'success', token, data: { user } });
+};
+
 exports.signup = catchAsync(async (req, res) => {
   const newUser = await User.create({
     name: req.body.name,
@@ -22,9 +29,7 @@ exports.signup = catchAsync(async (req, res) => {
   });
 
   //SECRET STRING MUST BE ATLEAST 36 CHARACTERS LONG also expiration time can be 90d 10h 5m 3s
-  const token = signToken(newUser._id);
-
-  res.status(201).json({ status: 'success', token, data: { user: newUser } });
+  createSendToken(newUser, 200, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -150,14 +155,22 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.passwordResetExpires = undefined;
   await user.save(); //we use save because we want to run all the validator that dont run with update
   //log user in and send jwt
-  const token = signToken(user._id);
-
-  res.status(201).json({ status: 'success', token });
+  createSendToken(user, 200, res);
 });
 
-exports.updatePassword = (req, res, next) => {
+exports.updatePassword = catchAsync(async (req, res, next) => {
   //get user from collection
+  // const user = await User.find({ _id: req.user.id });
+
+  const user = await User.findById(req.user.id).select('+password');
   //check if posted current password is correct
+  if (!(await user.correctPassword(req.body.passwordCurrent, user.password)))
+    return next(new AppError('Currrent password is Wrong password', 403));
   //update password
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  //User
+  await user.save();
   //log user in send jwt
-};
+  createSendToken(user, 200, res);
+});

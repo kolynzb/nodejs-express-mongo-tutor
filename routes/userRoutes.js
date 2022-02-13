@@ -6,7 +6,9 @@ const {
   updateUser,
   createUser,
   deleteUser,
-  getUserById
+  updateMe,
+  getUserById,
+  deleteMe
 } = require('../controllers/userController');
 const authController = require('../controllers/authController');
 
@@ -16,6 +18,13 @@ router.post('/login', authController.login);
 router.post('/forgotpassword', authController.forgotPassword);
 router.post('/resetpassword/:token', authController.resetPassword);
 
+router.patch(
+  '/updateMyPassword',
+  authController.protect,
+  authController.updatePassword
+); //use patch coz we are manipulating the user document
+
+router.patch('/updateMe', authController.protect, updateMe);
 router
   .route('/')
   .get(getAllUsers)

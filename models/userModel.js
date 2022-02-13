@@ -37,8 +37,14 @@ const userSchema = new mongoose.Schema({
   },
   passwordChangedAt: Date,
   passwordResetToken: String,
-  passwordResetExpires: Date
+  passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: false,
+    select: false
+  }
 });
+
 //since this middleware runs between receiving the info and saving it
 userSchema.pre('save', async function(next) {
   //only run if password is modified
