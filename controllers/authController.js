@@ -16,6 +16,17 @@ const signToken = id => {
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
 
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true //cannot be modified by the browser and send it automatically with every request
+  };
+
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true; //only sent over encrypted  if in production
+
+  res.cookie('jwt', token, cookieOptions);
+
   res.status(statusCode).json({ status: 'success', token, data: { user } });
 };
 
@@ -27,7 +38,7 @@ exports.signup = catchAsync(async (req, res) => {
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm
   });
-
+  newUser.password = undefined; // to prevvent in from showing
   //SECRET STRING MUST BE ATLEAST 36 CHARACTERS LONG also expiration time can be 90d 10h 5m 3s
   createSendToken(newUser, 200, res);
 });

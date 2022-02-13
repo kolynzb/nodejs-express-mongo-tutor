@@ -23,6 +23,7 @@ router.patch(
   authController.protect,
   authController.updatePassword
 ); //use patch coz we are manipulating the user document
+router.delete('/deleteMe', authController.protect, deleteMe); //used for deactivating the user
 
 router.patch('/updateMe', authController.protect, updateMe);
 router

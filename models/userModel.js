@@ -97,4 +97,12 @@ userSchema.methods.createPasswordResetToken = function() {
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; //adding 10 minutes multiple by 60 to make it secs and 1000 to make it milli seconds
   return resetToken;
 };
+
+//adding query middleware all queries that start with find
+userSchema.pre(/^find/, function(next) {
+  //this points to the current query
+  // this.find({ active: true }); or
+  this.find({ active: { $ne: false } });
+  next();
+});
 module.exports = mongoose.model('User', userSchema);
