@@ -30,7 +30,7 @@ app.use('/api', limiter); //will limit all routes that start with /api
 app.use(express.json({ limit: '10kb' })); // helps us access to the request body(body parser) and wont accept a body larger than 10kb
 
 //Data sanitization against nosql query injection
-app.use(mongoSanitize()); //returns a middleware that filters all dollar signs and dots to remove mongo db queries
+// app.use(mongoSanitize()); //returns a middleware that filters all dollar signs and dots to remove mongo db queries
 
 //Data sanitization against XSS
 app.use(xss());
