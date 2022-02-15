@@ -1,6 +1,10 @@
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require('mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -10,7 +14,10 @@ const globalErrorHandler = require('./controllers/errorController');
 const app = express();
 
 //Global middlewares
-if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
+
+app.use(helmet()); //for security http headers and must be ontop of the middleware stack
+
+if (process.env.NODE_ENV === 'development') app.use(morgan('dev')); //development logging
 
 const limiter = rateLimit({
   max: 100, //num of request
@@ -18,14 +25,39 @@ const limiter = rateLimit({
   message: 'Too many request from this Ip ,please try again in an hour!'
 });
 
-app.use('/api', limiter);
-app.use(express.json()); // helps us access to the request body
-app.use(express.static(`${__dirname}/public`));
+app.use('/api', limiter); //will limit all routes that start with /api
+
+app.use(express.json({ limit: '10kb' })); // helps us access to the request body(body parser) and wont accept a body larger than 10kb
+
+//Data sanitization against nosql query injection
+app.use(mongoSanitize()); //returns a middleware that filters all dollar signs and dots to remove mongo db queries
+
+//Data sanitization against XSS
+app.use(xss());
+
+//prevent parameter pollution
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price'
+    ] //this is a list of prameters that will be ignored
+  })
+);
+
+app.use(express.static(`${__dirname}/public`)); //Serving static files
+
 app.use((req, res, next) => {
+  //this is test middleware
   req.requestTime = new Date().toISOString();
   // console.log(req.headers);
   next();
 });
+
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
