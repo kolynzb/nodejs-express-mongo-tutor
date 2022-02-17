@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
+const factory = require('./handlerFactory');
 
 const filterObj = (obj, ...allowedFeilds) => {
   const newObj = {};
@@ -10,18 +11,10 @@ const filterObj = (obj, ...allowedFeilds) => {
     });
   return newObj;
 };
-const createUser = (req, res) => {};
-const getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
 
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: { users }
-  });
-});
-const getUserById = (req, res) => {};
-const updateUser = (req, res) => {};
+const getAllUsers = factory.getAll(User);
+const getUserById = factory.getOne(User);
+const updateUser = factory.updateOne(User);
 
 const updateMe = catchAsync(async (req, res, next) => {
   //create an error if user tries to update the password
@@ -44,14 +37,20 @@ const deleteMe = catchAsync(async (req, res) => {
   await User.findByIdAndUpdate(req.user.id, { active: false });
   res.status(204).json({ status: 'success', data: null });
 });
-const deleteUser = (req, res) => {};
+
+const deleteUser = factory.deleteOne(User);
+
+const getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
 
 module.exports = {
   getAllUsers,
   updateMe,
   deleteMe,
   updateUser,
-  createUser,
+  getMe,
   deleteUser,
   getUserById
 };

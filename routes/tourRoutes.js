@@ -1,6 +1,8 @@
 const express = require('express');
 const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
+// const reviewController = require('../controllers/reviewController');
+const reviewRouter = require('../routes/reviewRoutes');
 
 const router = express.Router();
 const { getTourById, updateTour, deleteTour } = tourController;
@@ -24,4 +26,15 @@ router
     authController.restrictTo('admin', 'lead-guide'),
     deleteTour
   );
+
+//nested routes
+// router
+//   .route('/:tourId/reviews')
+//   .post(
+//     authController.protect,
+//     authController.restrictTo('user'),
+//     reviewController.createReview
+//   );
+router.use('/:tourId/reviews', reviewRouter); //when this route is run ot willl mount this router instead
+
 module.exports = router;
