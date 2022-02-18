@@ -109,6 +109,8 @@ const tourSchema = new mongoose.Schema( //takes in two objects the schema defina
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } } //the toobject properties tells mongoose to output virtual properties when qeuried
 );
 
+tourSchema.index({ price: 1 });
+
 //virtual properties are values that are not  persisted in the database for instance the duration in weeks  which is derived from the duration in days
 tourSchema.virtual('durationWeeks').get(function() {
   //used a normal function because arrow functions dont have access to the this key word

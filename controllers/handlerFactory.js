@@ -5,7 +5,7 @@ const catchAsync = require('../utils/catchAsync');
 //factory functions are functions that return functions
 exports.deleteOne = Model =>
   catchAsync(async (req, res, next) => {
-    const doc = await Model.findByIdAndDelete(req.params.id);
+    const doc = await Model.findByIdAndDelete(req.params.id); //you can add .explain() to give you query statistics
 
     if (!doc)
       return next(
