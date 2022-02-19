@@ -19,6 +19,12 @@ router
   .route('/top-5-cheap')
   .get(tourController.aliasTopTours, tourController.getAllTours);
 
+router.get('/distances/:latlng/unit/:unit', tourController.getDistances);
+router.get(
+  '/tours-within/:distance/center/:latlng/unit/:unit',
+  tourController.getTourWithin
+);
+//
 router
   .route('/')
   .get(tourController.getAllTours)

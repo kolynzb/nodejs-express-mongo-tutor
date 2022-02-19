@@ -37,7 +37,8 @@ const tourSchema = new mongoose.Schema( //takes in two objects the schema defina
       type: Number,
       default: 4.5,
       min: [1, 'Rating must be above 1'],
-      max: [5, 'Rating must be below 5']
+      max: [5, 'Rating must be below 5'],
+      set: val => Math.round(val * 10) / 10 //4.6666 46.6666 47 4.7
     },
     ratingsQuantity: {
       type: Number,
@@ -109,7 +110,12 @@ const tourSchema = new mongoose.Schema( //takes in two objects the schema defina
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } } //the toobject properties tells mongoose to output virtual properties when qeuried
 );
 
-tourSchema.index({ price: 1 });
+//BUT if your app if you have a higher write to read ratio then you dont need
+
+//tourSchema.index({ price: 1 }); //indexing makes it easier for mongo to query data without having to go through each document so here it has been done for the field price that is queried very often 1-ascending -1 is decending
+tourSchema.index({ price: 1, ratingsAverage: -1 }); //this is a compound index
+tourSchema.index({ slug: 1 }); //this is probably the most queried feild
+tourSchema.index({ startLocation: '2dsphere' }); //use a 2d spheere index
 
 //virtual properties are values that are not  persisted in the database for instance the duration in weeks  which is derived from the duration in days
 tourSchema.virtual('durationWeeks').get(function() {
@@ -160,10 +166,10 @@ tourSchema.pre(/^find/, function(next) {
 // });
 
 //AGGREGAATION MIDDLEWARE
-tourSchema.pre('aggregate', function(next) {
-  this.pipeline().unshift({ secretTour: { $ne: true } });
-  next();
-});
+// tourSchema.pre('aggregate', function(next) {
+//   this.pipeline().unshift({ secretTour: { $ne: true } });
+//   next();
+// });
 
 //virtual populate to add reviews to the schema virtually
 tourSchema.virtual('reviews', {
