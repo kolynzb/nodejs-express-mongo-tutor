@@ -6,6 +6,7 @@ const helmet = require('helmet');
 // const mongoSanitize = require('mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const cookieParser = require('cookie-parser');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -36,6 +37,7 @@ const limiter = rateLimit({
 app.use('/api', limiter); //will limit all routes that start with /api
 
 app.use(express.json({ limit: '10kb' })); // helps us access to the request body(body parser) and wont accept a body larger than 10kb
+app.use(cookieParser()); //parses the cookie
 
 //Data sanitization against nosql query injection
 //app.use(mongoSanitize()); //returns a middleware that filters all dollar signs and dots to remove mongo db queries
@@ -61,6 +63,7 @@ app.use((req, res, next) => {
   //this is test middleware
   req.requestTime = new Date().toISOString();
   // console.log(req.headers);
+  // console.log(req.headers.cookies);
   next();
 });
 

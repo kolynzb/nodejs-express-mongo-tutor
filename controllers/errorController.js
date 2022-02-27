@@ -22,13 +22,20 @@ const handleJWTError = () =>
 const handleJWTExpiredError = () =>
   new AppError('Token has expired please login again', 400);
 
-const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    errors: err,
-    message: err.message,
-    stack: err.stack
-  });
+const sendErrorDev = (err, req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
+    res.status(err.statusCode).json({
+      status: err.status,
+      errors: err,
+      message: err.message,
+      stack: err.stack
+    });
+  } else {
+    //rendered website
+    res
+      .status(err.status)
+      .render('error', { title: 'Something went wrong!', msg: err.message });
+  }
 };
 
 const sendErrorProd = (err, res) => {
@@ -52,7 +59,7 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || 'error'; //default status
   //   console.log((process.env.NODE_ENVI = 'development'));
   if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, res);
+    sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
     let error = { ...err };
     if (error.name === 'CastError') error = handleCastErrorDB(error);

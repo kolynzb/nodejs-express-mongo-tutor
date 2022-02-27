@@ -61,6 +61,15 @@ exports.login = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: 'success', token });
 });
 
+exports.logout = (req, res) => {
+  //create a fake token that expires in a few seconds
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true
+  });
+  res.status(200).json({ status: 'success' });
+};
+
 exports.protect = catchAsync(async (req, res, next) => {
   //get token and check if its there,
   let token;
@@ -70,6 +79,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith('Bearer ')
   ) {
     token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
   if (!token) {
     return next(new AppError('You are not loggin In ', 401));
@@ -187,3 +198,29 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   //log user in send jwt
   createSendToken(user, 200, res);
 });
+
+//Only for rendered pages and there will be no error
+exports.isLoggedIn = async (req, res, next) => {
+  if (req.cookies.jwt) {
+    try {
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+
+      //check if user exists
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) return next();
+
+      //check if user has recently changed there password after token was issued
+      if (currentUser.changedPasswordAfter(decoded.iat)) return next();
+
+      //THERE IS A LOGGED IN USER
+      req.locals.user = currentUser; //this will give access to the user in pug
+      return next();
+    } catch (err) {
+      return next();
+    }
+  }
+  next();
+};
