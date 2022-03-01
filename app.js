@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+// const cors = require('cors');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -21,6 +22,7 @@ app.set('views', path.join(__dirname, 'views')); //putting the location of the v
 
 //Global middlewares
 
+// app.use(cors())
 //app.use(express.static(`${__dirname}/public`)); //Serving static files
 app.use(express.static(path.join(__dirname, 'public'))); //all static files will be served from this folder
 
@@ -37,6 +39,7 @@ const limiter = rateLimit({
 app.use('/api', limiter); //will limit all routes that start with /api
 
 app.use(express.json({ limit: '10kb' })); // helps us access to the request body(body parser) and wont accept a body larger than 10kb
+app.use(express.urlencoded({ extended: true, limit: '10kb' })); //parse data from a url encoded form
 app.use(cookieParser()); //parses the cookie
 
 //Data sanitization against nosql query injection
