@@ -3,7 +3,7 @@ const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-// const mongoSanitize = require('mongo-sanitize');
+const mongoSanitize = require('mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
@@ -43,7 +43,7 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' })); //parse data fro
 app.use(cookieParser()); //parses the cookie
 
 //Data sanitization against nosql query injection
-//app.use(mongoSanitize()); //returns a middleware that filters all dollar signs and dots to remove mongo db queries
+app.use(mongoSanitize()); //returns a middleware that filters all dollar signs and dots to remove mongo db queries
 
 //Data sanitization against XSS
 app.use(xss());

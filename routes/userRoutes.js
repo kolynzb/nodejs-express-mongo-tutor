@@ -8,7 +8,9 @@ const {
   updateMe,
   getUserById,
   getMe,
-  deleteMe
+  deleteMe,
+  uploadUserPhoto,
+  resizeUserPhoto
 } = require('../controllers/userController');
 const authController = require('../controllers/authController');
 
@@ -28,7 +30,7 @@ router.patch(
 ); //use patch coz we are manipulating the user document
 router.delete('/deleteMe', authController.protect, deleteMe); //used for deactivating the user
 
-router.patch('/updateMe', updateMe);
+router.patch('/updateMe', uploadUserPhoto, resizeUserPhoto, updateMe); //photo is the feild where your going to update the image
 router.route('/').get(getAllUsers);
 router
   .route('/:id')
