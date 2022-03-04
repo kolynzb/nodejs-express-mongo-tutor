@@ -13,17 +13,16 @@ const signToken = id => {
   });
 };
 
-const createSendToken = (user, statusCode, res) => {
+const createSendToken = (user, statusCode, req, res) => {
   const token = signToken(user._id);
 
   const cookieOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
-    httpOnly: true //cannot be modified by the browser and send it automatically with every request
+    httpOnly: true, //cannot be modified by the browser and send it automatically with every request
+    secure: req.secure || req.headers('x-forwarded-proto') === 'https' //only sent over encrypted  if in production
   };
-
-  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true; //only sent over encrypted  if in production
 
   res.cookie('jwt', token, cookieOptions);
 
@@ -36,7 +35,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   await new Email(newUser, url).sendWelcome();
 
   //SECRET STRING MUST BE ATLEAST 36 CHARACTERS LONG also expiration time can be 90d 10h 5m 3s
-  createSendToken(newUser, 201, res);
+  createSendToken(newUser, 201, req, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -174,7 +173,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.passwordResetExpires = undefined;
   await user.save(); //we use save because we want to run all the validator that dont run with update
   //log user in and send jwt
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -191,7 +190,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   //User
   await user.save();
   //log user in send jwt
-  createSendToken(user, 200, res);
+  createSendToken(user, 200, req, res);
 });
 
 //Only for rendered pages and there will be no error

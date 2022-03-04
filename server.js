@@ -12,7 +12,10 @@ process.on('uncaughtException', err => {
 
 const port = process.env.PORT || 3000;
 
-const DB_URI = process.env.DATABASE_LOCAL;
+const DB_URI =
+  process.env.NODE_ENV === 'production'
+    ? process.env.DATABASE
+    : process.env.DATABASE_LOCAL;
 
 mongoose.connect(DB_URI).then(() => console.log('Db connected successfully'));
 
@@ -25,4 +28,10 @@ process.on('unhandledRejection', err => {
   server.close(() => {
     process.exit(1);
   });
+});
+
+//HEROKU SPECIFIC
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM RECEIVED .shutting down gracefully');
+  server.close(() => console.log('💥 process terminated'));
 });

@@ -8,6 +8,7 @@ const compression = require('compression');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+
 // const cors = require('cors');
 
 const tourRouter = require('./routes/tourRoutes');
@@ -19,6 +20,8 @@ const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
+app.enable('trust proxy'); //this heroku specific
+
 app.set('view engine', 'pug'); //telling express what engine to use when rendering the templates
 app.set('views', path.join(__dirname, 'views')); //putting the location of the views
 
