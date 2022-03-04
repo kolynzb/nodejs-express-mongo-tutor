@@ -8,8 +8,7 @@ const compression = require('compression');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
-
-// const cors = require('cors');
+const cors = require('cors');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -27,7 +26,7 @@ app.set('views', path.join(__dirname, 'views')); //putting the location of the v
 
 //Global middlewares
 
-// app.use(cors())
+app.use(cors());
 //app.use(express.static(`${__dirname}/public`)); //Serving static files
 app.use(express.static(path.join(__dirname, 'public'))); //all static files will be served from this folder
 
