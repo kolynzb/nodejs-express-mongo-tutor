@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('mongo-sanitize');
+const compression = require('compression');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
@@ -63,6 +64,7 @@ app.use(
   })
 );
 
+app.use(compression());
 app.use((req, res, next) => {
   //this is test middleware
   req.requestTime = new Date().toISOString();
