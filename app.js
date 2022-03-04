@@ -27,7 +27,7 @@ app.set('views', path.join(__dirname, 'views')); //putting the location of the v
 //Global middlewares
 
 app.use(cors());
-//app.use(express.static(`${__dirname}/public`)); //Serving static files
+
 app.use(express.static(path.join(__dirname, 'public'))); //all static files will be served from this folder
 
 app.use(helmet()); //for security http headers and must be ontop of the middleware stack
