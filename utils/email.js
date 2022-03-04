@@ -13,10 +13,16 @@ module.exports = class Email {
   newTransport() {
     if (process.env.NODE_ENV === 'production') {
       //SENDGRID
-      return 1;
+      return nodemailer.createTransport({
+        service: 'SendGrid',
+        auth: {
+          user: process.env.SENDGRID_USERNAME,
+          pass: process.env.SENDGRID_PASSWORD
+        }
+      });
     }
 
-    return nodemailer.createTransporter({
+    return nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
       auth: {
@@ -26,8 +32,8 @@ module.exports = class Email {
     });
   }
 
-  
-  async send(template, subject) {//Send actual email
+  async send(template, subject) {
+    //Send actual email
     //render html of the email with a pug templates
     const html = pug.renderFile(`${__dirname}/../views/email/${template}.pug`, {
       firstName: this.firstName,
@@ -50,40 +56,16 @@ module.exports = class Email {
   async sendWelcome() {
     await this.send('welcome', 'Welcome to the Natours Family!');
   }
+
+  async sendPasswordReset() {
+    await this.send(
+      'passwordReset',
+      'Your password reset token (valid for 10 min)'
+    );
+  }
 };
 
-
-
-
-
-
-
-
-
-const sendEmail = async options => {
-  const transporter = nodemailer.createTransporter({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    auth: {
-      user: process.env.EMAIL_USERNAME,
-      pass: process.env.EMAIL_PASSWORD
-    }
-  });
-
-  
-
-module.exports = sendEmail;
-// const sendEmail = options => {
-//   //1.create a transporter
-//   // const transporter = nodemailer.createTransporter({
-//   //     service: 'Gmail',
-//   //     auth: {
-//   //     user: process.env.EMAIL_USERNAME,
-//   //     pass: process.env.EMAIL_PASSWORD
-//   //     }
-//   //     //activate in gmail "less secure app" option
-//   // });
-
-//   //2.defineemail options
-//   //3.send email
-// };
+//https://mailsac.com/ for creating disposale emails
+//https://app.sendgrid.com/guide/integrate/langs/smtp/verify
+//https://mailtrap.io/signin
+//https://medium.com/geekculture/how-to-use-nodemailer-with-gmail-to-send-e-mails-7198e707025d
