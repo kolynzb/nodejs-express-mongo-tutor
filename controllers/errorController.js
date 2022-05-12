@@ -5,6 +5,7 @@ const handleCastErrorDB = err => {
   return new AppError(`Invalid ${err.path} : ${err.value}`, 400);
 };
 const handleDuplicateErrorDB = err => {
+  //we use regex to find the value in quotes
   const value = err.errmsg.match(/(["'])(?:(?=(\\?))\2.)*?\1/)[0];
   //hanlding invalid db ids
   return new AppError(`duplicate feild value: ${value}`, 400); //400 bad request
